@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# 允许微信爬虫
+User-agent: MicroMessenger
+Allow: /
+
+# 允许所有搜索引擎
+User-agent: *
+Disallow: /wangye_kaifa/videos/
+Allow: /wangye_kaifa/images/
+
+Sitemap: https://ycr8dd55vv-boop.github.io/chuan-cai-recipes3/sitemap.xml
+
