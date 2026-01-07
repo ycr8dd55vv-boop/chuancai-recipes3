@@ -1,0 +1,670 @@
+/* 全局样式 - 参考苹果官网风格 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #1d1d1f;
+    --secondary-color: #86868b;
+    --bg-color: #f5f5f7;
+    --white: #ffffff;
+    --accent-color: #0071e3;
+    --hover-color: #0071e3;
+    --border-color: rgba(255, 255, 255, 0.3);
+    --text-primary: #1d1d1f;
+    --text-secondary: #86868b;
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.4);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+    background-attachment: fixed;
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+    min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+    /* 允许文本选择，但禁用长按菜单（移动端） */
+    -webkit-touch-callout: default;
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* 导航栏 */
+.navbar {
+    position: sticky;
+    top: 0;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: saturate(180%) blur(30px);
+    -webkit-backdrop-filter: saturate(180%) blur(30px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    z-index: 1000;
+    padding: 0;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    /* 移动端性能优化 */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-primary);
+    height: 80px;
+}
+
+.logo img {
+    height: 80px;
+    width: auto;
+    max-width: 350px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
+    transition: transform 0.3s ease;
+}
+
+.logo:hover img {
+    transform: scale(1.05);
+}
+
+#logo-text {
+    font-size: 28px;
+    font-weight: 600;
+}
+
+/* 主内容区 */
+.main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 22px 100px;
+}
+
+/* 搜索区域 */
+.search-section {
+    text-align: center;
+    margin-bottom: 80px;
+}
+
+.hero-title {
+    font-size: 56px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+.search-container {
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    padding: 12px 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    /* 移动端优化 */
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.search-container:focus-within {
+    background: rgba(255, 255, 255, 0.85);
+    border-color: rgba(0, 113, 227, 0.5);
+    box-shadow: 0 8px 32px rgba(0, 113, 227, 0.2);
+    transform: translateY(-2px);
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 17px;
+    color: var(--text-primary);
+    background: transparent;
+    padding: 0;
+    /* 移动端优化 */
+    -webkit-appearance: none;
+    appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+.search-input::placeholder {
+    color: var(--text-secondary);
+}
+
+.search-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: color 0.2s ease;
+    margin-left: 12px;
+}
+
+.search-button:hover {
+    color: var(--accent-color);
+}
+
+/* 菜谱网格 */
+.recipes-section {
+    margin-top: 60px;
+}
+
+.recipes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.recipe-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-radius: 24px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    /* 触摸优化 */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    /* 性能优化 */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    /* 允许文本选择 */
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+.recipe-card:hover {
+    transform: translateY(-12px) scale(1.02);
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* 移动端触摸反馈 */
+@media (max-width: 768px) {
+    .recipe-card:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+    }
+    
+    .recipe-card:hover {
+        transform: none; /* 移动端禁用hover效果 */
+    }
+}
+
+.recipe-image {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+}
+
+.recipe-card:hover .recipe-image {
+    transform: scale(1.05);
+}
+
+.recipe-info {
+    padding: 24px;
+}
+
+.recipe-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+    letter-spacing: -0.003em;
+}
+
+.recipe-description {
+    font-size: 17px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* 模态框 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: saturate(180%) blur(30px);
+    -webkit-backdrop-filter: saturate(180%) blur(30px);
+    margin: 20px;
+    border-radius: 28px;
+    max-width: 900px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: slideUp 0.3s ease;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.close-btn {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    font-size: 32px;
+    font-weight: 300;
+    color: var(--text-secondary);
+    cursor: pointer;
+    z-index: 10;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.close-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.9);
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-body {
+    padding: 40px;
+    background: transparent;
+}
+
+.modal-title {
+    font-size: 40px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+    letter-spacing: -0.005em;
+}
+
+.modal-video {
+    width: 100%;
+    border-radius: 16px;
+    margin-bottom: 30px;
+    background: #000;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    /* 微信浏览器视频优化 */
+    object-fit: contain;
+    -webkit-object-fit: contain;
+}
+
+.modal-description {
+    font-size: 19px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 30px;
+}
+
+.modal-ingredients {
+    margin-top: 30px;
+}
+
+.modal-ingredients h3 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+}
+
+.modal-ingredients ul {
+    list-style: none;
+    padding: 0;
+}
+
+.modal-ingredients li {
+    font-size: 17px;
+    color: var(--text-secondary);
+    padding: 8px 0;
+    padding-left: 24px;
+    position: relative;
+}
+
+.modal-ingredients li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: var(--accent-color);
+    font-size: 24px;
+    line-height: 1;
+}
+
+/* 动画 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* 响应式设计 - 移动端优化 */
+@media (max-width: 768px) {
+    /* 移动端性能优化 - 降低毛玻璃效果强度 */
+    .navbar {
+        backdrop-filter: saturate(150%) blur(20px);
+        -webkit-backdrop-filter: saturate(150%) blur(20px);
+    }
+    
+    .search-container {
+        backdrop-filter: saturate(150%) blur(15px);
+        -webkit-backdrop-filter: saturate(150%) blur(15px);
+    }
+    
+    .recipe-card {
+        backdrop-filter: saturate(150%) blur(15px);
+        -webkit-backdrop-filter: saturate(150%) blur(15px);
+    }
+    
+    .modal-content {
+        backdrop-filter: saturate(150%) blur(20px);
+        -webkit-backdrop-filter: saturate(150%) blur(20px);
+    }
+
+    body {
+        font-size: 16px;
+        -webkit-text-size-adjust: 100%;
+    }
+
+    .main-content {
+        padding: 30px 16px 60px;
+    }
+
+    .nav-container {
+        padding: 12px 16px;
+    }
+
+    .logo {
+        height: 60px;
+    }
+
+    .logo img {
+        height: 60px;
+        max-width: 250px;
+    }
+
+    #logo-text {
+        font-size: 22px;
+    }
+
+    .hero-title {
+        font-size: 32px;
+        margin-bottom: 16px;
+        line-height: 1.2;
+    }
+
+    .search-section {
+        margin-bottom: 40px;
+    }
+
+    .search-container {
+        padding: 14px 18px;
+        border-radius: 16px;
+        /* 防止键盘遮挡 */
+        position: relative;
+        z-index: 10;
+    }
+
+    .search-input {
+        font-size: 16px; /* 防止iOS自动缩放 */
+        /* 确保输入框可点击 */
+        touch-action: manipulation;
+    }
+
+    .search-button {
+        padding: 6px;
+        margin-left: 10px;
+    }
+
+    .recipes-section {
+        margin-top: 40px;
+    }
+
+    .recipes-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin-top: 24px;
+    }
+
+    .recipe-card {
+        border-radius: 20px;
+    }
+
+    .recipe-image {
+        height: 200px;
+    }
+
+    .recipe-info {
+        padding: 20px;
+    }
+
+    .recipe-title {
+        font-size: 20px;
+        margin-bottom: 6px;
+    }
+
+    .recipe-description {
+        font-size: 15px;
+        line-height: 1.4;
+    }
+
+    .modal {
+        padding: 0;
+    }
+
+    .modal-content {
+        margin: 0;
+        border-radius: 0;
+        max-width: 100%;
+        width: 100%;
+        max-height: 100vh;
+        height: 100vh;
+        border: none;
+    }
+
+    .close-btn {
+        right: 16px;
+        top: 16px;
+        width: 40px;
+        height: 40px;
+        font-size: 28px;
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .modal-body {
+        padding: 50px 20px 30px;
+        height: 100%;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        /* 微信浏览器滚动优化 */
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* 防止微信下拉刷新 */
+    .main-content {
+        overscroll-behavior-y: contain;
+    }
+
+    .modal-title {
+        font-size: 26px;
+        margin-bottom: 16px;
+        line-height: 1.3;
+    }
+
+    .modal-video {
+        width: 100%;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+
+    .modal-description {
+        font-size: 16px;
+        margin-bottom: 20px;
+        line-height: 1.6;
+    }
+
+    .modal-ingredients h3 {
+        font-size: 20px;
+        margin-bottom: 12px;
+    }
+
+    .modal-ingredients li {
+        font-size: 15px;
+        padding: 6px 0;
+        padding-left: 20px;
+    }
+
+    .no-results {
+        padding: 40px 20px;
+        font-size: 16px;
+    }
+}
+
+/* 微信浏览器特定优化 */
+@media screen and (max-width: 480px) {
+    .hero-title {
+        font-size: 28px;
+    }
+
+    .search-container {
+        padding: 12px 16px;
+    }
+
+    .recipe-image {
+        height: 180px;
+    }
+
+    .recipe-info {
+        padding: 16px;
+    }
+
+    .recipe-title {
+        font-size: 18px;
+    }
+
+    .recipe-description {
+        font-size: 14px;
+    }
+}
+
+/* 横屏优化 */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+    .hero-title {
+        font-size: 24px;
+        margin-bottom: 12px;
+    }
+
+    .search-section {
+        margin-bottom: 24px;
+    }
+
+    .recipes-grid {
+        gap: 12px;
+    }
+
+    .recipe-image {
+        height: 150px;
+    }
+}
+
+/* 无结果提示 */
+.no-results {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+    font-size: 19px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.no-results.hidden {
+    display: none;
+}
+
+
