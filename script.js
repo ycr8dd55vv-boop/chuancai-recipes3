@@ -241,6 +241,16 @@ function renderRecipes(recipesToRender) {
         img.className = 'recipe-image';
         img.loading = 'lazy'; // 懒加载优化
         
+        // 图片加载完成后，预加载视频元数据（优化微信加载速度）
+        img.addEventListener('load', function() {
+            // 延迟预加载，避免影响图片加载
+            // 使用更智能的延迟策略：第一个视频立即预加载，后续视频延迟
+            const delay = recipesToRender.indexOf(recipe) === 0 ? 300 : 800;
+            setTimeout(() => {
+                preloadVideoMetadata(recipe.video);
+            }, delay);
+        }, { once: true });
+        
         // 图片加载失败时的处理
         img.onerror = function() {
             // 尝试使用备用占位图
@@ -302,21 +312,138 @@ function getVideoType(videoPath) {
     return typeMap[extension] || 'video/mp4';
 }
 
+// 视频预加载缓存
+const videoPreloadCache = new Map();
+const videoPreloadQueue = [];
+let isPreloading = false;
+const MAX_CONCURRENT_PRELOADS = 2; // 最多同时预加载2个视频
+
+// 预加载视频元数据（优化加载速度）
+function preloadVideoMetadata(videoPath) {
+    // 如果已经预加载过，跳过
+    if (videoPreloadCache.has(videoPath)) {
+        const status = videoPreloadCache.get(videoPath);
+        if (status === 'ready' || status === 'loading') {
+            return;
+        }
+    }
+    
+    // 添加到队列
+    if (!videoPreloadQueue.includes(videoPath)) {
+        videoPreloadQueue.push(videoPath);
+    }
+    
+    // 开始处理队列
+    processPreloadQueue();
+}
+
+// 处理预加载队列
+function processPreloadQueue() {
+    // 如果正在预加载或队列为空，返回
+    if (isPreloading || videoPreloadQueue.length === 0) {
+        return;
+    }
+    
+    // 统计当前正在预加载的数量
+    let currentPreloads = 0;
+    videoPreloadCache.forEach((status) => {
+        if (status === 'loading') {
+            currentPreloads++;
+        }
+    });
+    
+    // 如果已达到最大并发数，等待
+    if (currentPreloads >= MAX_CONCURRENT_PRELOADS) {
+        return;
+    }
+    
+    // 从队列中取出一个视频
+    const videoPath = videoPreloadQueue.shift();
+    if (!videoPath) {
+        return;
+    }
+    
+    // 标记为预加载中
+    videoPreloadCache.set(videoPath, 'loading');
+    isPreloading = true;
+    
+    // 创建隐藏的video元素预加载元数据
+    const preloadVideo = document.createElement('video');
+    preloadVideo.preload = 'metadata';
+    preloadVideo.style.display = 'none';
+    preloadVideo.style.width = '1px';
+    preloadVideo.style.height = '1px';
+    preloadVideo.style.position = 'absolute';
+    preloadVideo.style.opacity = '0';
+    preloadVideo.style.pointerEvents = 'none';
+    preloadVideo.src = videoPath;
+    
+    // 元数据加载成功后，标记为已预加载
+    preloadVideo.addEventListener('loadedmetadata', function() {
+        videoPreloadCache.set(videoPath, 'ready');
+        isPreloading = false;
+        // 清理预加载元素
+        setTimeout(() => {
+            if (preloadVideo.parentNode) {
+                preloadVideo.parentNode.removeChild(preloadVideo);
+            }
+        }, 1000);
+        // 继续处理队列
+        processPreloadQueue();
+    }, { once: true });
+    
+    // 错误处理
+    preloadVideo.addEventListener('error', function() {
+        videoPreloadCache.set(videoPath, 'error');
+        isPreloading = false;
+        if (preloadVideo.parentNode) {
+            preloadVideo.parentNode.removeChild(preloadVideo);
+        }
+        // 继续处理队列
+        processPreloadQueue();
+    }, { once: true });
+    
+    // 添加到body（隐藏）
+    document.body.appendChild(preloadVideo);
+}
+
+// 批量预加载前几个视频（页面加载完成后）
+function preloadInitialVideos() {
+    // 预加载前3个视频的元数据
+    const initialVideos = recipes.slice(0, 3).map(recipe => recipe.video);
+    initialVideos.forEach((videoPath, index) => {
+        // 延迟预加载，避免影响页面初始加载
+        setTimeout(() => {
+            preloadVideoMetadata(videoPath);
+        }, 1000 + index * 500); // 每个视频间隔500ms
+    });
+}
+
 // 打开菜谱详情模态框
 function openRecipeModal(recipe) {
     const videoType = getVideoType(recipe.video);
     const videoPath = recipe.video;
+    const isWeChat = /MicroMessenger/i.test(navigator.userAgent);
     
     // 如果是MOV格式，尝试同时提供MP4备选
     const videoExtension = videoPath.split('.').pop().toLowerCase();
     const alternativePath = videoExtension === 'mov' ? videoPath.replace('.mov', '.mp4') : null;
     
-    // 创建视频加载状态提示
+    // 创建视频加载状态提示（带进度条）
     const loadingHtml = `
-        <div class="video-loading" style="padding: 40px; text-align: center; background: rgba(0,0,0,0.5); border-radius: 12px; color: white;">
+        <div class="video-loading" style="padding: 40px; text-align: center; background: rgba(0,0,0,0.7); border-radius: 12px; color: white;">
+            <div class="loading-spinner" style="width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
             <p style="font-size: 16px; margin-bottom: 10px;">正在加载视频...</p>
-            <p style="font-size: 14px; opacity: 0.8;">${videoPath}</p>
+            <div class="loading-progress" style="width: 100%; height: 4px; background: rgba(255,255,255,0.3); border-radius: 2px; margin: 15px 0;">
+                <div class="progress-bar" style="width: 0%; height: 100%; background: #0071e3; border-radius: 2px; transition: width 0.3s ease;"></div>
+            </div>
+            <p class="loading-text" style="font-size: 14px; opacity: 0.8; margin-top: 10px;">准备中...</p>
         </div>
+        <style>
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+        </style>
     `;
     
     // 构建source标签
@@ -329,7 +456,16 @@ function openRecipeModal(recipe) {
         <h1 class="modal-title">${recipe.name}</h1>
         <div id="video-container">
             ${loadingHtml}
-            <video class="modal-video" controls playsinline webkit-playsinline x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="true" preload="metadata" style="display: none;">
+            <video class="modal-video" 
+                   controls 
+                   playsinline 
+                   webkit-playsinline 
+                   x5-playsinline 
+                   x5-video-player-type="h5" 
+                   x5-video-player-fullscreen="true" 
+                   preload="none"
+                   ${isWeChat ? 'x5-video-orientation="portrait"' : ''}
+                   style="display: none;">
                 ${sourceTags}
                 您的浏览器不支持视频播放。
             </video>
@@ -349,8 +485,20 @@ function openRecipeModal(recipe) {
     const video = modalBody.querySelector('video');
     const videoContainer = document.getElementById('video-container');
     const loadingDiv = videoContainer.querySelector('.video-loading');
+    const progressBar = loadingDiv ? loadingDiv.querySelector('.progress-bar') : null;
+    const loadingText = loadingDiv ? loadingDiv.querySelector('.loading-text') : null;
     
     if (video) {
+        // 更新加载进度
+        function updateProgress(percent, text) {
+            if (progressBar) {
+                progressBar.style.width = percent + '%';
+            }
+            if (loadingText) {
+                loadingText.textContent = text || '加载中...';
+            }
+        }
+        
         // 详细的错误处理
         function handleVideoError(error) {
             const videoExtension = videoPath.split('.').pop().toLowerCase();
@@ -420,21 +568,49 @@ function openRecipeModal(recipe) {
             `;
         }
         
-        // 视频加载成功
+        // 视频加载进度事件
+        video.addEventListener('loadstart', function() {
+            updateProgress(10, '开始加载视频...');
+        });
+        
+        video.addEventListener('progress', function() {
+            if (video.buffered.length > 0) {
+                const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+                const duration = video.duration;
+                if (duration > 0) {
+                    const percent = Math.min(90, (bufferedEnd / duration) * 100);
+                    updateProgress(percent, `已加载 ${Math.round(percent)}%`);
+                }
+            }
+        });
+        
+        // 视频元数据加载成功
         video.addEventListener('loadedmetadata', function() {
+            updateProgress(30, '视频信息加载完成');
             console.log('视频元数据加载成功:', {
                 videoPath: videoPath,
                 duration: video.duration,
                 videoWidth: video.videoWidth,
                 videoHeight: video.videoHeight
             });
-            if (loadingDiv) loadingDiv.style.display = 'none';
-            video.style.display = 'block';
         });
         
-        // 视频可以播放
+        // 视频可以开始播放
         video.addEventListener('canplay', function() {
-            console.log('视频可以播放:', videoPath);
+            updateProgress(70, '视频准备就绪');
+        });
+        
+        // 视频可以流畅播放
+        video.addEventListener('canplaythrough', function() {
+            updateProgress(100, '加载完成');
+            setTimeout(() => {
+                if (loadingDiv) loadingDiv.style.display = 'none';
+                video.style.display = 'block';
+                // 微信浏览器特殊处理：自动播放第一帧
+                if (isWeChat) {
+                    video.currentTime = 0.1;
+                }
+            }, 300);
         });
         
         // 视频加载错误
@@ -442,40 +618,72 @@ function openRecipeModal(recipe) {
             handleVideoError(e);
         });
         
-        // 检查视频文件是否存在
-        function checkVideoExists() {
-            const testImg = new Image();
-            testImg.onload = function() {
-                console.log('视频文件存在，开始加载:', videoPath);
+        // 检查是否已经预加载过
+        const preloadStatus = videoPreloadCache.get(videoPath);
+        const isPreloaded = preloadStatus === 'ready';
+        
+        // 微信浏览器特殊优化：使用更激进的加载策略
+        if (isWeChat) {
+            // 微信浏览器：先设置preload为auto，然后立即加载
+            video.preload = 'auto';
+            // 如果已预加载，可以更快开始
+            if (isPreloaded) {
+                updateProgress(20, '使用预加载数据，快速启动...');
+            }
+            // 直接开始加载，不等待检查
+            setTimeout(() => {
+                if (!isPreloaded) {
+                    updateProgress(5, '正在连接服务器...');
+                }
                 video.load();
-            };
-            testImg.onerror = function() {
-                console.error('视频文件不存在:', videoPath);
-                handleVideoError({ code: 2, message: '文件不存在' });
-            };
-            // 使用HEAD请求检查文件（如果支持）
-            fetch(videoPath, { method: 'HEAD' })
-                .then(response => {
-                    if (response.ok) {
-                        console.log('视频文件存在，状态:', response.status);
+            }, isPreloaded ? 10 : 50);
+        } else {
+            // 其他浏览器：先检查文件是否存在
+            function checkVideoExists() {
+                updateProgress(5, '检查视频文件...');
+                // 使用HEAD请求检查文件
+                fetch(videoPath, { 
+                    method: 'HEAD',
+                    cache: 'no-cache'
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            updateProgress(10, '文件存在，开始加载...');
+                            // 设置preload并开始加载
+                            video.preload = 'auto';
+                            setTimeout(() => {
+                                video.load();
+                            }, 100);
+                        } else {
+                            console.error('视频文件不存在或无法访问:', response.status);
+                            handleVideoError({ code: 2, message: `HTTP ${response.status}` });
+                        }
+                    })
+                    .catch(error => {
+                        // CORS问题或网络问题，直接尝试加载
+                        console.warn('无法检查视频文件，直接加载:', error);
+                        updateProgress(10, '开始加载视频...');
+                        video.preload = 'auto';
                         setTimeout(() => {
                             video.load();
                         }, 100);
-                    } else {
-                        console.error('视频文件不存在或无法访问:', response.status);
-                        handleVideoError({ code: 2, message: `HTTP ${response.status}` });
-                    }
-                })
-                .catch(error => {
-                    console.warn('无法检查视频文件（可能是CORS问题），尝试直接加载:', error);
-                    setTimeout(() => {
-                        video.load();
-                    }, 100);
-                });
+                    });
+            }
+            
+            // 开始检查并加载
+            checkVideoExists();
         }
         
-        // 开始检查并加载
-        checkVideoExists();
+        // 添加超时处理
+        const loadTimeout = setTimeout(() => {
+            if (video.readyState < 2) { // HAVE_METADATA
+                updateProgress(50, '加载较慢，请稍候...');
+            }
+        }, 5000);
+        
+        video.addEventListener('loadedmetadata', function() {
+            clearTimeout(loadTimeout);
+        }, { once: true });
     }
 }
 
@@ -568,6 +776,14 @@ renderRecipes(recipes);
 
 // 微信优化
 optimizeForWeChat();
+
+// 页面加载完成后，批量预加载前几个视频
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', preloadInitialVideos);
+} else {
+    // DOM已经加载完成，延迟执行预加载
+    setTimeout(preloadInitialVideos, 2000);
+}
 
 // 图片路径诊断函数（开发调试用）
 function diagnoseImagePaths() {

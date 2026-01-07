@@ -8,23 +8,23 @@
 :root {
     --primary-color: #1d1d1f;
     --secondary-color: #86868b;
-    --bg-color: #f5f5f7;
+    --bg-color: #faf9f6;
     --white: #ffffff;
-    --accent-color: #0071e3;
-    --hover-color: #0071e3;
-    --border-color: rgba(255, 255, 255, 0.3);
-    --text-primary: #1d1d1f;
-    --text-secondary: #86868b;
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.4);
+    --accent-color: #d32f2f;
+    --hover-color: #b71c1c;
+    --border-color: rgba(0, 0, 0, 0.08);
+    --text-primary: #2c2c2c;
+    --text-secondary: #666666;
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.6);
+    --warm-beige: #f5f3f0;
+    --light-cream: #fefcf9;
 }
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+    background: linear-gradient(180deg, #fefcf9 0%, #faf9f6 50%, #f5f3f0 100%);
     background-attachment: fixed;
-    background-size: 400% 400%;
-    animation: gradientShift 15s ease infinite;
     color: var(--text-primary);
     line-height: 1.6;
     overflow-x: hidden;
@@ -34,31 +34,43 @@ body {
     -webkit-touch-callout: default;
     -webkit-user-select: text;
     user-select: text;
+    position: relative;
 }
 
-@keyframes gradientShift {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
+/* 添加微妙的纹理效果 */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 50%, rgba(0, 0, 0, 0.01) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(0, 0, 0, 0.01) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(0, 0, 0, 0.01) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
 }
+
+body > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* 移除渐变动画，使用静态背景 */
 
 /* 导航栏 */
 .navbar {
     position: sticky;
     top: 0;
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.9);
     backdrop-filter: saturate(180%) blur(30px);
     -webkit-backdrop-filter: saturate(180%) blur(30px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     z-index: 1000;
     padding: 0;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
     /* 移动端性能优化 */
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
@@ -127,13 +139,13 @@ body {
     position: relative;
     display: flex;
     align-items: center;
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.9);
     backdrop-filter: saturate(180%) blur(20px);
     -webkit-backdrop-filter: saturate(180%) blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 20px;
     padding: 12px 20px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
     /* 移动端优化 */
     -webkit-appearance: none;
@@ -141,9 +153,9 @@ body {
 }
 
 .search-container:focus-within {
-    background: rgba(255, 255, 255, 0.85);
-    border-color: rgba(0, 113, 227, 0.5);
-    box-shadow: 0 8px 32px rgba(0, 113, 227, 0.2);
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(211, 47, 47, 0.3);
+    box-shadow: 0 6px 24px rgba(211, 47, 47, 0.15);
     transform: translateY(-2px);
 }
 
@@ -184,6 +196,16 @@ body {
     color: var(--accent-color);
 }
 
+/* 更新强调色为红色系（符合菜谱风格） */
+.modal-ingredients li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: var(--accent-color);
+    font-size: 24px;
+    line-height: 1;
+}
+
 /* 菜谱网格 */
 .recipes-section {
     margin-top: 60px;
@@ -197,15 +219,15 @@ body {
 }
 
 .recipe-card {
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: saturate(180%) blur(20px);
     -webkit-backdrop-filter: saturate(180%) blur(20px);
     border-radius: 24px;
     overflow: hidden;
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.06);
     /* 触摸优化 */
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
@@ -219,9 +241,9 @@ body {
 
 .recipe-card:hover {
     transform: translateY(-12px) scale(1.02);
-    background: rgba(255, 255, 255, 0.85);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-    border-color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+    border-color: rgba(0, 0, 0, 0.1);
 }
 
 /* 移动端触摸反馈 */
@@ -275,7 +297,7 @@ body {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     animation: fadeIn 0.3s ease;
@@ -288,7 +310,7 @@ body {
 }
 
 .modal-content {
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.98);
     backdrop-filter: saturate(180%) blur(30px);
     -webkit-backdrop-filter: saturate(180%) blur(30px);
     margin: 20px;
@@ -299,8 +321,8 @@ body {
     overflow-y: auto;
     position: relative;
     animation: slideUp 0.3s ease;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .close-btn {
@@ -425,21 +447,25 @@ body {
     .navbar {
         backdrop-filter: saturate(150%) blur(20px);
         -webkit-backdrop-filter: saturate(150%) blur(20px);
+        background: rgba(255, 255, 255, 0.95);
     }
     
     .search-container {
         backdrop-filter: saturate(150%) blur(15px);
         -webkit-backdrop-filter: saturate(150%) blur(15px);
+        background: rgba(255, 255, 255, 0.95);
     }
     
     .recipe-card {
         backdrop-filter: saturate(150%) blur(15px);
         -webkit-backdrop-filter: saturate(150%) blur(15px);
+        background: rgba(255, 255, 255, 0.98);
     }
     
     .modal-content {
         backdrop-filter: saturate(150%) blur(20px);
         -webkit-backdrop-filter: saturate(150%) blur(20px);
+        background: rgba(255, 255, 255, 0.98);
     }
 
     body {
